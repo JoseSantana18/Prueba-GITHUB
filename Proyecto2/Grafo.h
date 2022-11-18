@@ -21,7 +21,7 @@ struct TAREA
     char nombre[TALLA];
     char descripcion[TALLA];
     char tipo[TALLA];
-    int esfuerzo;
+    char encargado[TALLA];
 };
 
 struct VERTICE
@@ -44,6 +44,13 @@ struct GRAFO
 	VERTICE *verticeInicial;
 };
 
+struct ARISTA
+{
+	ARISTA *sig; //para saber la siguiente arista
+	VERTICE *tareaDestino; //Vertice destino/adyacente
+	int esfuerzo; //esfuerzo de una tarea a otra
+	int tiempo; //tiempo de una tarea a otra
+};
 
 //Inicializar el grafo
 GRAFO *nuevoGrafo(void)
@@ -85,7 +92,7 @@ int tamanoGrafo(GRAFO *pGrafo)
 }
 
 //Inicializa un nodo lugar
-VERTICE* crearVerticeLugar(int aID,char aNombre[], char aDescripcion[],char aTipo[], int aEsfuerzo)
+VERTICE* crearVerticeLugar(int aID,char aNombre[], char aDescripcion[],char aTipo[],char aEncargado[])
 {
 	VERTICE *nuevoLugar;
 	nuevoLugar = (VERTICE*) malloc(sizeof(VERTICE));
@@ -96,7 +103,8 @@ VERTICE* crearVerticeLugar(int aID,char aNombre[], char aDescripcion[],char aTip
 	strcpy(nuevoLugar->lugar->nombre,aNombre);
 	strcpy(nuevoLugar->lugar->descripcion, aDescripcion);
 	strcpy(nuevoLugar->lugar->tipo, aTipo);
-	nuevoLugar->lugar->esfuerzo = aEsfuerzo;
+	strcpy(nuevoLugar->lugar->encargado, aEncargado);
+	
 	
 	//Nuevas inicializaciones
 	nuevoLugar->visitado =  0;
@@ -107,14 +115,14 @@ VERTICE* crearVerticeLugar(int aID,char aNombre[], char aDescripcion[],char aTip
 	
 	return nuevoLugar;
 }
-//Función para insertar el vertice de un lugar en el grafo, teniendo en cuenta los datos a ingresar, entre ellos: el nombre del lugar, la provincia de pertenciencia y la población
-//ENTRADAS: El grafo de los lugares, el nombre del lugar, provincia y población
-void insertarVerticeLugar(GRAFO *apGrafo, int aID,char aNombre[], char aDescripcion[], char aTipo[],int aEsfuerzo)
+//Función para insertar el vertice de un lugar en el grafo, teniendo en cuenta los datos a ingresar
+//ENTRADAS: El grafo de las tareas con el ID, nombre, descripcion, tipo, encargado
+void insertarVerticeLugar(GRAFO *apGrafo, int aID,char aNombre[], char aDescripcion[], char aTipo[],char aEncargado[])
 {
 	VERTICE *pVerticeHead, *pVerticeAux;
 	if(grafoVacio(apGrafo))
 	{
-		apGrafo->verticeInicial = crearVerticeLugar(aID,aNombre,aDescripcion,aTipo,aEsfuerzo);
+		apGrafo->verticeInicial = crearVerticeLugar(aID,aNombre,aDescripcion,aTipo,aEncargado);
 		return;
 	}
 	pVerticeHead = apGrafo->verticeInicial;
@@ -123,16 +131,16 @@ void insertarVerticeLugar(GRAFO *apGrafo, int aID,char aNombre[], char aDescripc
 		pVerticeAux = pVerticeHead; 
 		pVerticeHead = pVerticeHead->sig;
 	}
-	pVerticeAux->sig = crearVerticeLugar(aID,aNombre,aDescripcion,aTipo,aEsfuerzo);
+	pVerticeAux->sig = crearVerticeLugar(aID,aNombre,aDescripcion,aTipo,aEncargado);
 	pVerticeAux->sig->sig = NULL;
 
 	apGrafo->cantVertices = apGrafo->cantVertices+1;
 
 	return;	
 }
-//Función que permite obtener el vertice (lugar) de un grafo dado su el nombre del lugar
-//ENTRADAS: El grafo de los lugares y un dato de tipo char que almacena el nombre del lugar
-//SALIDAS: La función retornará NULL si el lugar no existe y retornará el vertice si sí existe el lugar
+//Función que permite obtener el vertice (tarea) de un grafo dado su el nombre de la tarea
+//ENTRADAS: El grafo de las tareas y un dato de tipo char que almacena el nombre de la tarea
+//SALIDAS: La función retornará NULL si la tarea no existe y retornará el vertice si sí existe la tarea
 VERTICE *getVertice(GRAFO *grafo,char nombreLugar[])
 {
 	VERTICE *nVerticeAux = NULL;
@@ -148,11 +156,10 @@ VERTICE *getVertice(GRAFO *grafo,char nombreLugar[])
 	
 }
 
-//Funcion que permite crear una arista (camino) en el grafo,la cual almacena los sig.tes datos: Tiempo y la distanacia de traslado
-//ENTRADAS: datos de tipo float que indiquen el tiempo y distancia de traslado. 
 
-//Función que permite mostrar el grafo como una lista de adyacencia tomando en cuenta los lugares (vertices) y caminos (aristas)
-//ENTRADAS: El grafo con los lugares y caminos
+
+//Función que permite mostrar el grafo como una lista de adyacencia tomando en cuenta las tareas (vertices) y caminos (aristas)
+//ENTRADAS: El grafo con las tareas y caminos
 void listaAdyacencia(GRAFO *apGrafo)
 {
 	VERTICE *pVerticeAux;
@@ -166,14 +173,19 @@ void listaAdyacencia(GRAFO *apGrafo)
 		printf("Tarea %s\n",pVerticeAux->lugar->nombre);
 		printf("Descripcion: %s\n",pVerticeAux->lugar->descripcion);
 		printf("Tipo de tarea: %s\n",pVerticeAux->lugar->tipo);
-		printf("Esfuerzo: %d\n",pVerticeAux->lugar->esfuerzo);
-		printf("_____________________  -->");
+		printf("Encargado de la tarea: %s\n",pVerticeAux->lugar->encargado);
+		printf("_______________________________________  -->");
+		pAristaAux = pVerticeAux->adyacente;
+		while(pAristaAux != NULL)
+		{
+			printf("|Destino:%s|Esfuerzo:%d|Tiempo:%d|-->", pAristaAux->tareaDestino->lugar->nombre,pAristaAux->esfuerzo,pAristaAux->tiempo);
+			pAristaAux = pAristaAux->sig;
+		}
 		pVerticeAux = pVerticeAux->sig;
 		printf("\n");	
 	}
-}
-//Función que permite eliminar una arista (camino) tomando en cuenta el destino y origen del camino
-//ENTRADAS: Punteros que referencian la ubicacion de origen y el destino
+	}
+
 
 ListaT *crearLista(void)
 {
@@ -182,10 +194,7 @@ ListaT *crearLista(void)
 	L->inicio=NULL;
 	return L;
 }
-//FUNCION PARA CREAR UN NODO
-//E: nombre del transporte, maximo de pasajeros, minimo de pasajeros, cantidad de viajes
-//S: nodo creado
-//R: NH
+
 void liberarListaT(ListaT *L)
 {
 	NodoT *n,*aux;
@@ -200,5 +209,42 @@ void liberarListaT(ListaT *L)
 		aux=n;
 		n=n->siguiente;
 		free(aux);
+	}
+}
+
+//Funcion que permite crear una arista (camino) en el grafo,la cual almacena los sig.tes datos: esfuerzo y tiempo de solucion
+//ENTRADAS: datos de tipo int que indiquen el esfuerzo y tiempo de traslado. 
+ARISTA* crearArista(int esfuerzo, int tiempo)
+{
+	ARISTA *nuevaArista = NULL;
+	nuevaArista = (ARISTA*)malloc(sizeof(ARISTA));
+	nuevaArista->sig = NULL;
+	nuevaArista->esfuerzo = esfuerzo;
+	nuevaArista->tiempo = tiempo;
+	nuevaArista->tareaDestino =(VERTICE*)malloc(sizeof(VERTICE));
+	nuevaArista->tareaDestino = NULL;
+	return nuevaArista;
+}
+//Función que permite insertar una arista (camino) dentro del grafo. Tomando en cuenta la tarea de origen y destino, el esfuerzo y tiempo de traslado entre origen-destino
+//ENTRADAS: Datos de tipo VERTICE que indiquen la ubicación del destino y origen en memoria, el esfuerzo y tiempo de traslado
+void insertarArista(VERTICE *apOrigen,VERTICE *apDestino,int esfuerzo, int tiempo)  
+{
+	ARISTA *newArista = crearArista(esfuerzo, tiempo);
+	ARISTA *pAristaAux;
+	pAristaAux = apOrigen->adyacente;
+	
+	if(pAristaAux == NULL)
+	{
+		apOrigen->adyacente = newArista;
+		newArista->tareaDestino = apDestino;
+		
+	}else{
+		while(pAristaAux->sig!=NULL)
+		{
+			pAristaAux = pAristaAux->sig;
+		}
+		pAristaAux->sig = newArista;
+		newArista->tareaDestino = apDestino;
+		newArista->sig = NULL;
 	}
 }

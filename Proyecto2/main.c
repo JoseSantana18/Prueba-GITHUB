@@ -27,7 +27,7 @@
 //VARIABLES PARA EL MENU DE LUGARES
 #define CREAR_TAREA		 	90
 #define MODIFICAR_TAREA			91
-#define CREAR_RUTA				92
+#define CREAR_CAMINO			92
 #define ATRAS_TAREA				93	
 #define VER_GRAFO				94
 
@@ -55,9 +55,11 @@ void menuTareas(GRAFO *apGrafo)
 			{
 				
 			}
-			case CREAR_RUTA:
+			case CREAR_CAMINO:
 			{
-					
+				system("cls");
+				crearCamino(apGrafo);
+				break;	
 			}
 			case VER_GRAFO:{
 				system("cls");
@@ -80,7 +82,7 @@ int menuTareasAux()
 {
 	int indice = 0;
 	const int opciones[] = {
-		CREAR_TAREA, MODIFICAR_TAREA, CREAR_RUTA, VER_GRAFO,ATRAS_TAREA};
+		CREAR_TAREA, MODIFICAR_TAREA, CREAR_CAMINO, VER_GRAFO,ATRAS_TAREA};
 		
 	do{
 		system("cls");
@@ -109,7 +111,7 @@ int validarEntero(char numero[])
 -------------------------------------------------------------------------------------------------------------------------------------------------*/
 int validarEntero(char numero[]);
 //Funcion que despliega el menu principal del sistema
-//ENTRADAS: El grafo para ingresar caminos y lugrares / La lista para ingresar los datos de la configuracion del transporte
+//ENTRADAS: El grafo para ingresar caminos y tareas / La lista para ingresar los datos de la configuracion de la administración de proyectos
 void menuPrincipal(GRAFO *apGrafo,ListaT *L){
 	system("cls");
 	char opAux[10];
